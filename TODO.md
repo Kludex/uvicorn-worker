@@ -1,0 +1,5 @@
+- [ ] Pipeline is missing
+- [ ] Test for first and last uvicorn version.
+- [ ] "Add server header" parameter is not forwarded to Uvicorn. - Confirm this.
+- [ ] Check other issues/PRs created on uvicorn about Gunicorn.
+- [ ] Check if reload can be done via SIGHUP, or forward `--reload` flag.
