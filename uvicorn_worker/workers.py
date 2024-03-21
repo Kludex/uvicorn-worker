@@ -27,7 +27,6 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-
 from __future__ import annotations
 
 import asyncio
@@ -38,16 +37,9 @@ from typing import Any
 
 from gunicorn.arbiter import Arbiter
 from gunicorn.workers.base import Worker
-from uvicorn.config import Config
-from uvicorn.server import Server
 
-# TODO: "Add server header" parameter is not forwarded to Uvicorn.
-# TODO: Shutdown events are not triggered when using Gunicorn.
-# TODO: Check other issues/PRs created on uvicorn about Gunicorn.
-# TODO: Add tests.
-# TODO: Check if reload can be done via SIGHUP, or forward `--reload` flag.
-# TODO: Add encode license.
-# TODO: Add project license.
+from uvicorn.config import Config
+from uvicorn.main import Server
 
 
 class UvicornWorker(Worker):
@@ -67,9 +59,6 @@ class UvicornWorker(Worker):
         logger.propagate = False
 
         logger = logging.getLogger("uvicorn.access")
-        logger.disabled = True
-
-        logger = logging.getLogger("access")
         logger.handlers = self.log.access_log.handlers
         logger.setLevel(self.log.access_log.level)
         logger.propagate = False
@@ -114,9 +103,24 @@ class UvicornWorker(Worker):
         for s in self.SIGNALS:
             signal.signal(s, signal.SIG_DFL)
 
+        signal.signal(signal.SIGUSR1, self.handle_usr1)
+        # Don't let SIGUSR1 disturb active requests by interrupting system calls
+        signal.siginterrupt(signal.SIGUSR1, False)
+
+    def _install_sigquit_handler(self) -> None:
+        """Install a SIGQUIT handler on workers.
+
+        - https://github.com/encode/uvicorn/issues/1116
+        - https://github.com/benoitc/gunicorn/issues/2604
+        """
+
+        loop = asyncio.get_running_loop()
+        loop.add_signal_handler(signal.SIGQUIT, self.handle_exit, signal.SIGQUIT, None)
+
     async def _serve(self) -> None:
-        self.config.app = self.access_logger_adapter(app=self.wsgi)
+        self.config.app = self.wsgi
         server = Server(config=self.config)
+        self._install_sigquit_handler()
         await server.serve(sockets=self.sockets)
         if not server.started:
             sys.exit(Arbiter.WORKER_BOOT_ERROR)
