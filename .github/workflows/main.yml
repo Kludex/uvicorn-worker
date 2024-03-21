@@ -23,7 +23,7 @@ jobs:
       - name: "Install dependencies"
         run:
           pip install -e .
-          pip install pytest cryptography trustme
+          pip install pytest cryptography trustme httpx
     #   - name: "Run linting checks"
     #     run: "scripts/check"
     #     shell: bash
