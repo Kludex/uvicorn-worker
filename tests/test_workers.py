@@ -38,21 +38,10 @@ class Process(subprocess.Popen):
 
 
 @pytest.fixture(
-    params=(
-        pytest.param(uvicorn_workers.UvicornWorker, marks=pytest.mark.subprocess),
-        pytest.param(uvicorn_workers.UvicornH11Worker, marks=pytest.mark.subprocess),
-    )
+    params=(uvicorn_workers.UvicornWorker, uvicorn_workers.UvicornH11Worker)
 )
 def worker_class(request: pytest.FixtureRequest) -> str:
-    """Gunicorn worker class names to test.
-
-    This is a parametrized fixture. When the fixture is used in a test, the test
-    will be automatically parametrized, running once for each fixture parameter. All
-    tests using the fixture will be automatically marked with `pytest.mark.subprocess`.
-
-    https://docs.pytest.org/en/latest/how-to/fixtures.html
-    https://docs.pytest.org/en/latest/proposals/parametrize_with_fixtures.html
-    """
+    """Gunicorn worker class names to test."""
     worker_class = request.param
     return f"{worker_class.__module__}.{worker_class.__name__}"
 

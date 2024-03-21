@@ -1,0 +1,37 @@
+name: Test Suite
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  tests:
+    name: "Python ${{ matrix.python-version }}"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.8", "3.9", "3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "${{ matrix.python-version }}"
+      - name: "Install dependencies"
+        run:
+          pip install -e .
+          pip install pytest cryptography trustme
+    #   - name: "Run linting checks"
+    #     run: "scripts/check"
+    #     shell: bash
+    #   - name: "Build package & docs"
+    #     run: "scripts/build"
+      - name: "Run tests"
+        # run: "scripts/test"
+        run: pytest
+        timeout-minutes: 10
+    #   - name: "Enforce coverage"
+    #     run: "scripts/coverage"

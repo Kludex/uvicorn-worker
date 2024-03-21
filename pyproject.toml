@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "uvicorn-worker"
 description = "Uvicorn worker for Gunicorn! ✨"
@@ -16,7 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
 ]
-license = "MIT"
+license = "BSD-3-Clause"
 requires-python = ">=3.8"
 dependencies = ["uvicorn>=0.14.0", "gunicorn>=20.1.0"]
 optional-dependencies = {}
