@@ -10,7 +10,7 @@ on:
 
 jobs:
   tests:
-    name: "Python ${{ matrix.python-version }} with Uvicorn ${{ matrix.uvicorn-version }} | Gunicorn ${{ matrix.gunicorn-version }}"
+    name: "Python ${{ matrix.python-version }} (Uvicorn ${{ matrix.uvicorn-version }}/Gunicorn ${{ matrix.gunicorn-version }})"
     runs-on: ubuntu-latest
     strategy:
       matrix:

@@ -5,14 +5,16 @@ import subprocess
 import tempfile
 import time
 from ssl import SSLContext
-from typing import IO, Generator
+from typing import IO, TYPE_CHECKING, Generator
 
 import httpx
 import pytest
 from gunicorn.arbiter import Arbiter
-from uvicorn._types import ASGIReceiveCallable, ASGISendCallable, LifespanStartupFailedEvent, Scope
 
 from uvicorn_worker import UvicornH11Worker, UvicornWorker
+
+if TYPE_CHECKING:
+    from uvicorn._types import ASGIReceiveCallable, ASGISendCallable, LifespanStartupFailedEvent, Scope
 
 
 class Process(subprocess.Popen):
