@@ -20,18 +20,14 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: "${{ matrix.python-version }}"
-      - name: "Install dependencies"
-        run:
-          pip install -e .
-          pip install pytest cryptography trustme httpx
-    #   - name: "Run linting checks"
-    #     run: "scripts/check"
-    #     shell: bash
-    #   - name: "Build package & docs"
-    #     run: "scripts/build"
-      - name: "Run tests"
-        # run: "scripts/test"
-        run: pytest
+      - name: Install dependencies
+        run: scripts/install
+      - name: Run linting checks
+        run: scripts/check
+      - name: Build package
+        run: scripts/build
+      - name: Run tests
+        run: scripts/test
         timeout-minutes: 10
-    #   - name: "Enforce coverage"
-    #     run: "scripts/coverage"
+      - name: Enforce coverage
+        run: scripts/coverage

@@ -37,18 +37,14 @@ class Process(subprocess.Popen):
         return self.output.read().decode()
 
 
-@pytest.fixture(
-    params=(uvicorn_workers.UvicornWorker, uvicorn_workers.UvicornH11Worker)
-)
+@pytest.fixture(params=(uvicorn_workers.UvicornWorker, uvicorn_workers.UvicornH11Worker))
 def worker_class(request: pytest.FixtureRequest) -> str:
     """Gunicorn worker class names to test."""
     worker_class = request.param
     return f"{worker_class.__module__}.{worker_class.__name__}"
 
 
-async def app(
-    scope: Scope, receive: ASGIReceiveCallable, send: ASGISendCallable
-) -> None:
+async def app(scope: Scope, receive: ASGIReceiveCallable, send: ASGISendCallable) -> None:
     assert scope["type"] == "http"
     start_event: HTTPResponseStartEvent = {
         "type": "http.response.start",
@@ -116,9 +112,7 @@ def gunicorn_process(
         base_url = f"http://{bind}"
         verify = False
     args.append(app)
-    with httpx.Client(
-        base_url=base_url, verify=verify
-    ) as client, tempfile.TemporaryFile() as output:
+    with httpx.Client(base_url=base_url, verify=verify) as client, tempfile.TemporaryFile() as output:
         with Process(args, stdout=output, stderr=output) as process:
             time.sleep(1)
             assert not process.poll()
@@ -138,9 +132,7 @@ def test_get_request_to_asgi_app(gunicorn_process: Process) -> None:
 
 
 @pytest.mark.parametrize("signal_to_send", gunicorn_arbiter.Arbiter.SIGNALS)
-def test_gunicorn_arbiter_signal_handling(
-    gunicorn_process: Process, signal_to_send: signal.Signals
-) -> None:
+def test_gunicorn_arbiter_signal_handling(gunicorn_process: Process, signal_to_send: signal.Signals) -> None:
     """Test Gunicorn arbiter signal handling.
 
     This test iterates over the signals handled by the Gunicorn arbiter,
@@ -172,9 +164,7 @@ def test_gunicorn_arbiter_signal_handling(
             assert expected_text in output_text
 
 
-async def app_with_lifespan_startup_failure(
-    scope: Scope, receive: ASGIReceiveCallable, send: ASGISendCallable
-) -> None:
+async def app_with_lifespan_startup_failure(scope: Scope, receive: ASGIReceiveCallable, send: ASGISendCallable) -> None:
     """An ASGI app instance for testing Uvicorn worker boot errors."""
     if scope["type"] == "lifespan":
         message = await receive()

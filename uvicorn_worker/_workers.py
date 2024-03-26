@@ -27,6 +27,7 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -37,9 +38,8 @@ from typing import Any
 
 from gunicorn.arbiter import Arbiter
 from gunicorn.workers.base import Worker
-
 from uvicorn.config import Config
-from uvicorn.main import Server
+from uvicorn.server import Server
 
 
 class UvicornWorker(Worker):

@@ -253,9 +253,7 @@ def unused_tcp_port() -> int:
     params=[
         pytest.param(
             "uvicorn.protocols.websockets.wsproto_impl:WSProtocol",
-            marks=pytest.mark.skipif(
-                not importlib.util.find_spec("wsproto"), reason="wsproto not installed."
-            ),
+            marks=pytest.mark.skipif(not importlib.util.find_spec("wsproto"), reason="wsproto not installed."),
             id="wsproto",
         ),
         pytest.param(
