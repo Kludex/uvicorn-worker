@@ -7,4 +7,5 @@ fi
 
 set -x
 
+${PREFIX}coverage combine -a -q
 ${PREFIX}coverage report

@@ -59,6 +59,7 @@ filterwarnings = ["error"]
 
 [tool.coverage.run]
 source_pkgs = ["uvicorn_worker", "tests"]
+parallel = true
 
 [tool.coverage.report]
 show_missing = true

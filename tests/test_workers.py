@@ -2,30 +2,17 @@ from __future__ import annotations
 
 import signal
 import subprocess
-import sys
 import tempfile
 import time
-from typing import TYPE_CHECKING
+from ssl import SSLContext
+from typing import IO, Generator
 
 import httpx
 import pytest
+from gunicorn.arbiter import Arbiter
+from uvicorn._types import ASGIReceiveCallable, ASGISendCallable, LifespanStartupFailedEvent, Scope
 
-if TYPE_CHECKING:
-    from ssl import SSLContext
-    from typing import IO, Generator
-
-    from uvicorn._types import (
-        ASGIReceiveCallable,
-        ASGISendCallable,
-        HTTPResponseBodyEvent,
-        HTTPResponseStartEvent,
-        LifespanStartupFailedEvent,
-        Scope,
-    )
-
-pytestmark = pytest.mark.skipif(sys.platform == "win32", reason="requires unix")
-gunicorn_arbiter = pytest.importorskip("gunicorn.arbiter", reason="requires gunicorn")
-uvicorn_workers = pytest.importorskip("uvicorn.workers", reason="requires gunicorn")
+from uvicorn_worker import UvicornH11Worker, UvicornWorker
 
 
 class Process(subprocess.Popen):
@@ -37,7 +24,7 @@ class Process(subprocess.Popen):
         return self.output.read().decode()
 
 
-@pytest.fixture(params=(uvicorn_workers.UvicornWorker, uvicorn_workers.UvicornH11Worker))
+@pytest.fixture(params=(UvicornWorker, UvicornH11Worker))
 def worker_class(request: pytest.FixtureRequest) -> str:
     """Gunicorn worker class names to test."""
     worker_class = request.param
@@ -46,18 +33,8 @@ def worker_class(request: pytest.FixtureRequest) -> str:
 
 async def app(scope: Scope, receive: ASGIReceiveCallable, send: ASGISendCallable) -> None:
     assert scope["type"] == "http"
-    start_event: HTTPResponseStartEvent = {
-        "type": "http.response.start",
-        "status": 204,
-        "headers": [],
-    }
-    body_event: HTTPResponseBodyEvent = {
-        "type": "http.response.body",
-        "body": b"",
-        "more_body": False,
-    }
-    await send(start_event)
-    await send(body_event)
+    await send({"type": "http.response.start", "status": 204, "headers": []})
+    await send({"type": "http.response.body", "body": b"", "more_body": False})
 
 
 @pytest.fixture(
@@ -131,7 +108,7 @@ def test_get_request_to_asgi_app(gunicorn_process: Process) -> None:
     assert "uvicorn.workers", "startup complete" in output_text
 
 
-@pytest.mark.parametrize("signal_to_send", gunicorn_arbiter.Arbiter.SIGNALS)
+@pytest.mark.parametrize("signal_to_send", Arbiter.SIGNALS)
 def test_gunicorn_arbiter_signal_handling(gunicorn_process: Process, signal_to_send: signal.Signals) -> None:
     """Test Gunicorn arbiter signal handling.
 
@@ -141,7 +118,7 @@ def test_gunicorn_arbiter_signal_handling(gunicorn_process: Process, signal_to_s
 
     https://docs.gunicorn.org/en/latest/signals.html
     """
-    signal_abbreviation = gunicorn_arbiter.Arbiter.SIG_NAMES[signal_to_send]
+    signal_abbreviation = Arbiter.SIG_NAMES[signal_to_send]
     expected_text = f"Handling signal: {signal_abbreviation}"
     gunicorn_process.send_signal(signal_to_send)
     time.sleep(0.5)
@@ -208,9 +185,7 @@ def gunicorn_process_with_lifespan_startup_failure(
             process.wait(timeout=2)
 
 
-def test_uvicorn_worker_boot_error(
-    gunicorn_process_with_lifespan_startup_failure: Process,
-) -> None:
+def test_uvicorn_worker_boot_error(gunicorn_process_with_lifespan_startup_failure: Process) -> None:
     """Test Gunicorn arbiter shutdown behavior after Uvicorn worker boot errors.
 
     Previously, if Uvicorn workers raised exceptions during startup,
