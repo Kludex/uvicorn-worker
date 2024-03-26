@@ -10,34 +10,18 @@ on:
 
 jobs:
   tests:
-    name: "Python ${{ matrix.python-version }} (Uvicorn ${{ matrix.uvicorn-version }}/Gunicorn ${{ matrix.gunicorn-version }})"
+    name: "Python ${{ matrix.python-version }}"
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.8", "3.8", "3.9", "3.10", "3.12"]
-        uvicorn-version: ["0.14.0", "latest"]
-        gunicorn-version: ["20.1.0", "latest"]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
           python-version: "${{ matrix.python-version }}"
       - name: Install dependencies
-        run: |
-          scripts/install
-
-          if [ "$UVICORN_VERSION" != "latest" ]; then
-            echo "Uvicorn version is not the latest. Installing specified version..."
-            pip install uvicorn==$UVICORN_VERSION
-          fi
-
-          if [ "$GUNICORN_VERSION" != "latest" ]; then
-            echo "Gunicorn version is not the latest. Installing specified version..."
-            pip install gunicorn==$GUNICORN_VERSION
-          fi
-        env:
-          UVICORN_VERSION: ${{ matrix.uvicorn-version }}
-          GUNICORN_VERSION: ${{ matrix.gunicorn-version }}
+        run: scripts/install
       - name: Run linting checks
         run: scripts/check
       - name: Build package
