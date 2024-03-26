@@ -11,7 +11,7 @@ import httpx
 import pytest
 from gunicorn.arbiter import Arbiter
 
-from uvicorn_worker import UvicornH11Worker, UvicornWorker
+import uvicorn_worker
 
 if TYPE_CHECKING:
     from uvicorn._types import ASGIReceiveCallable, ASGISendCallable, LifespanStartupFailedEvent, Scope
@@ -26,7 +26,7 @@ class Process(subprocess.Popen):
         return self.output.read().decode()
 
 
-@pytest.fixture(params=(UvicornWorker, UvicornH11Worker))
+@pytest.fixture(params=(uvicorn_worker.UvicornWorker, uvicorn_worker.UvicornH11Worker))
 def worker_class(request: pytest.FixtureRequest) -> str:
     """Gunicorn worker class names to test."""
     worker_class = request.param
