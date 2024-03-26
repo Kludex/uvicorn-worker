@@ -30,9 +30,6 @@ dynamic = ["version"]
 [tool.hatch.version]
 path = "uvicorn_worker/__init__.py"
 
-[[tool.hatch.envs.test.matrix]]
-python = ["3.8", "3.9", "3.10", "3.11"]
-
 [tool.mypy]
 warn_unused_ignores = true
 warn_redundant_casts = true
