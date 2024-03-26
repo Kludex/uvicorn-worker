@@ -55,7 +55,10 @@ combine-as-imports = true
 
 [tool.pytest.ini_options]
 addopts = ["--strict-config", "--strict-markers"]
-filterwarnings = ["error"]
+filterwarnings = [
+    "error",
+    "ignore:pkg_resources is deprecated as an API.*:DeprecationWarning",
+]
 
 [tool.coverage.run]
 source_pkgs = ["uvicorn_worker", "tests"]
