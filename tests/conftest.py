@@ -43,13 +43,13 @@ def tls_ca_certificate_pem_path(tls_certificate_authority: trustme.CA):
 
 
 @pytest.fixture
-def tls_ca_certificate_private_key_path(tls_certificate_authority: trustme.CA):
+def tls_ca_certificate_private_key_path(tls_certificate_authority: trustme.CA):  # pragma: no cover
     with tls_certificate_authority.private_key_pem.tempfile() as private_key:
         yield private_key
 
 
 @pytest.fixture
-def tls_certificate_private_key_encrypted_path(tls_certificate: trustme.LeafCert):
+def tls_certificate_private_key_encrypted_path(tls_certificate: trustme.LeafCert):  # pragma: no cover
     private_key = serialization.load_pem_private_key(
         tls_certificate.private_key_pem.bytes(),
         password=None,
@@ -61,7 +61,7 @@ def tls_certificate_private_key_encrypted_path(tls_certificate: trustme.LeafCert
         serialization.BestAvailableEncryption(b"uvicorn password for the win"),
     )
     with trustme.Blob(encrypted_key).tempfile() as private_encrypted_key:
-        yield private_encrypted_key  # pragma: no cover
+        yield private_encrypted_key
 
 
 @pytest.fixture
