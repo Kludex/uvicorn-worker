@@ -140,7 +140,7 @@ def test_gunicorn_arbiter_signal_handling(gunicorn_process: Process, signal_to_s
         if signal_to_send not in flaky_signals:
             time.sleep(2)
             output_text = gunicorn_process.read_output()
-            assert expected_text in output_text
+            assert expected_text in output_text, signal_to_send
 
 
 async def app_with_lifespan_startup_failure(scope: Scope, receive: ASGIReceiveCallable, send: ASGISendCallable) -> None:
