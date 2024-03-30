@@ -206,7 +206,7 @@ def test_uvicorn_worker_boot_error(gunicorn_process_with_lifespan_startup_failur
     output_text = gunicorn_process_with_lifespan_startup_failure.read_output()
     try:
         assert expected_text in output_text
-        assert gunicorn_process_with_lifespan_startup_failure.poll()
+        assert gunicorn_process_with_lifespan_startup_failure.poll()  # pragma: no cover
     except AssertionError:  # pragma: no cover
         time.sleep(2)
         output_text = gunicorn_process_with_lifespan_startup_failure.read_output()
