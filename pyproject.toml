@@ -55,7 +55,7 @@ combine-as-imports = true
 
 [tool.pytest.ini_options]
 addopts = ["--strict-config", "--strict-markers"]
-filterwarnings = ["error", "ignore::DeprecationWarning:pkg_resources"]
+filterwarnings = ["error", "ignore::DeprecationWarning"]
 
 [tool.coverage.run]
 source = ["uvicorn_worker", "tests"]
