@@ -10,8 +10,10 @@ on:
 
 jobs:
   tests:
-    name: "Py ${{ matrix.python-version }} / Uvicorn${{ matrix.uvicorn-version == '' && ' (latest)' || format(' {0}', matrix.uvicorn-version) }} / Gunicorn${{
-      matrix.gunicorn-version == '' && ' (latest)' || format(' {0}', matrix.gunicorn-version) }}"
+    name: |
+      Py ${{ matrix.python-version }} /
+      Uvicorn${{matrix.uvicorn-version == '' && ' (latest)' || format(' {0}', matrix.uvicorn-version) }} /
+      Gunicorn${{matrix.gunicorn-version == '' && ' (latest)' || format(' {0}', matrix.gunicorn-version) }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
