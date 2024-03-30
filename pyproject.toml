@@ -58,7 +58,7 @@ addopts = ["--strict-config", "--strict-markers"]
 filterwarnings = ["error"]
 
 [tool.coverage.run]
-source_pkgs = ["uvicorn_worker", "tests"]
+source = ["uvicorn_worker", "tests"]
 parallel = true
 
 [tool.coverage.report]

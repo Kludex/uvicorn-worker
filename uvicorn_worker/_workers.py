@@ -128,7 +128,7 @@ class UvicornWorker(Worker):
     def run(self) -> None:
         return asyncio.run(self._serve())
 
-    async def callback_notify(self) -> None:
+    async def callback_notify(self) -> None:  # pragma: no cover
         self.notify()
 
 

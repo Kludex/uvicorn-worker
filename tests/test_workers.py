@@ -11,7 +11,7 @@ import httpx
 import pytest
 from gunicorn.arbiter import Arbiter
 
-import uvicorn_worker._workers
+from uvicorn_worker import UvicornH11Worker, UvicornWorker
 
 if TYPE_CHECKING:
     from uvicorn._types import ASGIReceiveCallable, ASGISendCallable, LifespanStartupFailedEvent, Scope
@@ -26,14 +26,14 @@ class Process(subprocess.Popen):
         return self.output.read().decode()
 
 
-@pytest.fixture(params=(uvicorn_worker._workers.UvicornWorker, uvicorn_worker._workers.UvicornH11Worker))
+@pytest.fixture(params=(UvicornWorker, UvicornH11Worker))
 def worker_class(request: pytest.FixtureRequest) -> str:
     """Gunicorn worker class names to test."""
     worker_class = request.param
     return f"{worker_class.__module__}.{worker_class.__name__}"
 
 
-async def app(scope: Scope, receive: ASGIReceiveCallable, send: ASGISendCallable) -> None:
+async def app(scope: Scope, receive: ASGIReceiveCallable, send: ASGISendCallable) -> None:  # pragma: no cover
     assert scope["type"] == "http"
     await send({"type": "http.response.start", "status": 204, "headers": []})
     await send({"type": "http.response.body", "body": b"", "more_body": False})
