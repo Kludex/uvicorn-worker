@@ -93,7 +93,7 @@ def gunicorn_process(
     args.append(app)
     with httpx.Client(base_url=base_url, verify=verify) as client, tempfile.TemporaryFile() as output:
         with Process(args, stdout=output, stderr=output) as process:
-            time.sleep(1)
+            time.sleep(1.5)
             assert not process.poll()
             process.client = client
             process.output = output
