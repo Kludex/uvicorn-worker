@@ -1,0 +1,41 @@
+name: Test Suite
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  tests:
+    name: |
+      Py ${{ matrix.python-version }} /
+      Uvicorn${{matrix.uvicorn-version == '' && ' (latest)' || format(' {0}', matrix.uvicorn-version) }} /
+      Gunicorn${{matrix.gunicorn-version == '' && ' (latest)' || format(' {0}', matrix.gunicorn-version) }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        uvicorn-version: ["0.14.0", ""]
+        gunicorn-version: ["20.1.0", ""]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "${{ matrix.python-version }}"
+      - name: Install dependencies
+        run: |
+          pip install "${{ format('uvicorn{0}{1}', matrix.uvicorn-version != '' && '==' || '', matrix.uvicorn-version) }}"
+          pip install "${{ format('gunicorn{0}{1}', matrix.gunicorn-version != '' && '==' || '', matrix.gunicorn-version) }}"
+          scripts/install
+      - name: Run linting checks
+        run: scripts/check
+      - name: Build package
+        run: scripts/build
+      - name: Run tests
+        run: scripts/test
+        timeout-minutes: 10
+      - name: Enforce coverage
+        run: scripts/coverage
