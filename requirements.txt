@@ -1,8 +1,8 @@
 -e .
 
 # Packaging
-build==1.0.3
-twine==4.0.2
+build==1.2.2.post1
+twine==6.0.1
 
 # Testing
 ruff==0.3.4
