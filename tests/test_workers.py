@@ -4,8 +4,9 @@ import signal
 import subprocess
 import tempfile
 import time
+from collections.abc import Generator
 from ssl import SSLContext
-from typing import IO, TYPE_CHECKING, Generator
+from typing import IO, TYPE_CHECKING
 
 import httpx
 import pytest
