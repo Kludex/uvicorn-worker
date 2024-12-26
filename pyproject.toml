@@ -26,6 +26,11 @@ dependencies = ["uvicorn>=0.15.0", "gunicorn>=20.1.0"]
 optional-dependencies = {}
 dynamic = ["version"]
 
+[project.urls]
+Changelog = "https://github.com/Kludex/uvicorn-worker/releases"
+Funding = "https://github.com/sponsors/Kludex"
+Source = "https://github.com/Kludex/uvicorn-worker"
+
 [tool.hatch.version]
 path = "uvicorn_worker/__init__.py"
 
