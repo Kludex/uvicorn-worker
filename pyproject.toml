@@ -28,7 +28,6 @@ optional-dependencies = {}
 dynamic = ["version"]
 
 [project.urls]
-# Homepage = "https://www.uvicorn-worker.marcelotryle.com"
 Changelog = "https://github.com/Kludex/uvicorn-worker/releases"
 Funding = "https://github.com/sponsors/Kludex"
 Source = "https://github.com/Kludex/uvicorn-worker"
