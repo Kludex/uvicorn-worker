@@ -27,6 +27,8 @@ jobs:
           python-version: "${{ matrix.python-version }}"
       - name: Install dependencies
         run: |
+          # TODO: Drop the following line when we bump uvicorn minimum version.
+          pip install --upgrade 'pip<24.1'
           pip install "${{ format('uvicorn{0}{1}', matrix.uvicorn-version != '' && '==' || '', matrix.uvicorn-version) }}"
           pip install "${{ format('gunicorn{0}{1}', matrix.gunicorn-version != '' && '==' || '', matrix.gunicorn-version) }}"
           scripts/install
