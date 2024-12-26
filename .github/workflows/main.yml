@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
-        uvicorn-version: ["0.14.0", ""]
+        uvicorn-version: ["0.15.0", ""]
         gunicorn-version: ["20.1.0", ""]
     steps:
       - uses: actions/checkout@v4
