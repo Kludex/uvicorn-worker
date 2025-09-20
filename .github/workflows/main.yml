@@ -19,7 +19,7 @@ jobs:
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         uvicorn-version: ["0.15.0", ""]
-        gunicorn-version: ["20.1.0", ""]
+        gunicorn-version: ["21.0.0", ""]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
