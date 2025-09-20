@@ -23,7 +23,7 @@ classifiers = [
 ]
 license = "BSD-3-Clause"
 requires-python = ">=3.9"
-dependencies = ["uvicorn>=0.36.0", "gunicorn>=20.1.0"]
+dependencies = ["uvicorn>=0.36.0", "gunicorn>=21.0.0"]
 optional-dependencies = {}
 dynamic = ["version"]
 
