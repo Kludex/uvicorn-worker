@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import os
 import re
 import signal
@@ -38,14 +39,16 @@ def worker_class(request: pytest.FixtureRequest) -> str:
 
 async def app(scope: Scope, receive: ASGIReceiveCallable, send: ASGISendCallable) -> None:  # pragma: no cover
     assert scope["type"] == "http"
+    if scope["path"] == "/slow":
+        await asyncio.sleep(60)
     await send({"type": "http.response.start", "status": 204, "headers": []})
     await send({"type": "http.response.body", "body": b"", "more_body": False})
 
 
 @pytest.fixture(
     params=(
-        pytest.param(False, id="TLS off"),
-        pytest.param(True, id="TLS on"),
+        pytest.param({"tls": False}, id="TLS off"),
+        pytest.param({"tls": True}, id="TLS on"),
     )
 )
 def gunicorn_process(
@@ -64,7 +67,8 @@ def gunicorn_process(
     """
     app = "tests.test_workers:app"
     bind = f"127.0.0.1:{unused_tcp_port}"
-    use_tls: bool = request.param
+    use_tls: bool = request.param.get("tls", False)
+    max_requests: int | None = request.param.get("max_requests")
     args = [
         "gunicorn",
         "--bind",
@@ -78,6 +82,8 @@ def gunicorn_process(
         "--workers",
         "1",
     ]
+    if max_requests is not None:
+        args += ["--max-requests", str(max_requests)]
     if use_tls is True:
         args_for_tls = [
             "--ca-certs",
@@ -239,3 +245,35 @@ def test_uvicorn_worker_boot_error(gunicorn_process_with_lifespan_startup_failur
         output_text = gunicorn_process_with_lifespan_startup_failure.read_output()
         assert expected_text in output_text
         assert gunicorn_process_with_lifespan_startup_failure.poll()
+
+
+@pytest.mark.parametrize(
+    "gunicorn_process",
+    [pytest.param({"max_requests": 1}, id="--max-requests 1")],
+    indirect=True,
+)
+def test_graceful_timeout_bounds_the_shutdown(gunicorn_process: Process) -> None:
+    """Test that Gunicorn's `graceful_timeout` bounds the Uvicorn shutdown.
+
+    `Server.shutdown` waits for in-flight requests to finish, for
+    `timeout_graceful_shutdown` seconds when that is set and indefinitely when
+    it is not. While it waits it no longer notifies the arbiter, because
+    `callback_notify` is only reached from `Server.main_loop`, which has already
+    exited. A worker retiring on `--max-requests` with a long-running request
+    therefore hangs until the arbiter's `timeout` expires and aborts it.
+
+    Retiring the worker with `--max-requests` rather than a signal keeps the
+    arbiter's own `graceful_timeout` kill from deciding the outcome first.
+    """
+    # the client gives up, but the request it started keeps running in the worker
+    with pytest.raises(httpx.ReadTimeout):
+        gunicorn_process.client.get("/slow", timeout=0.5)
+    # a completed response trips `--max-requests`, retiring the worker
+    gunicorn_process.client.get("/")
+    expected_text = "timeout graceful shutdown exceeded"
+    for _ in range(20):
+        output_text = gunicorn_process.read_output()
+        if expected_text in output_text:
+            break
+        time.sleep(0.5)
+    assert expected_text in output_text, output_text
