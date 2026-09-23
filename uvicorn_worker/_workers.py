@@ -100,6 +100,8 @@ class UvicornWorker(Worker):
         for s in self.SIGNALS:
             signal.signal(s, signal.SIG_DFL)
 
+        signal.signal(signal.SIGABRT, self.handle_abort)
+
         signal.signal(signal.SIGUSR1, self.handle_usr1)
         # Don't let SIGUSR1 disturb active requests by interrupting system calls
         signal.siginterrupt(signal.SIGUSR1, False)

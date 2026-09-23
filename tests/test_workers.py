@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+import re
 import signal
 import subprocess
 import tempfile
@@ -109,6 +111,30 @@ def test_get_request_to_asgi_app(gunicorn_process: Process) -> None:
     output_text = gunicorn_process.read_output()
     assert response.status_code == 204
     assert "uvicorn.workers", "startup complete" in output_text
+
+
+def worker_pid(process: Process) -> int:
+    """Read the worker PID out of the Gunicorn arbiter's output."""
+    for _ in range(20):
+        match = re.search(r"Booting worker with pid: (\d+)", process.read_output())
+        if match:
+            return int(match.group(1))
+        time.sleep(0.5)  # pragma: no cover
+    raise AssertionError("worker did not boot")  # pragma: no cover
+
+
+def test_worker_abort_exits_through_the_worker_handler(gunicorn_process: Process) -> None:
+    """Test that a worker aborted by the arbiter exits through its own handler.
+
+    The arbiter sends SIGABRT to a worker that misses `timeout`. Gunicorn's
+    `Worker.handle_abort` calls the `worker_abort` hook and raises `SystemExit`,
+    which lets the arbiter log "Worker exiting" as the worker process unwinds.
+    """
+    pid = worker_pid(gunicorn_process)
+    os.kill(pid, signal.SIGABRT)
+    time.sleep(1)
+    output_text = gunicorn_process.read_output()
+    assert f"Worker exiting (pid: {pid})" in output_text, output_text
 
 
 @pytest.mark.parametrize("signal_to_send", Arbiter.SIGNALS)
